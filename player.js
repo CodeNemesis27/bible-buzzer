@@ -1,14 +1,20 @@
 /* ============================================================
-   Bible Buzzer — Player logic
+   Song Scramble — Team logic
    ============================================================ */
 
 const playerId = generatePlayerId();
 let playerName = "";
 let roomCode = "";
 let channel = null;
-let currentQuestionIndex = -1;
-let hasAnsweredThisRound = false;
+
+let currentIndex = -1;
+let tokens = [];        // canonical order for the current line
+let pool = [];          // shuffled tokens still waiting to be tapped
+let builtCount = 0;     // how many correct taps in a row so far
+let locked = false;
 let myScore = 0;
+
+const WRONG_RESET_DELAY_MS = 500;
 
 // ---- DOM refs ----
 const joinView = document.getElementById("joinView");
@@ -26,8 +32,8 @@ const waitingName = document.getElementById("waitingName");
 
 const questionCounterP = document.getElementById("questionCounterP");
 const myScoreEl = document.getElementById("myScore");
-const questionTextP = document.getElementById("questionTextP");
-const tileGridP = document.getElementById("tileGridP");
+const sentenceBuilder = document.getElementById("sentenceBuilder");
+const wordPool = document.getElementById("wordPool");
 const statusP = document.getElementById("statusP");
 
 const finalResultP = document.getElementById("finalResultP");
@@ -56,7 +62,7 @@ function join() {
   joinError.textContent = "";
 
   if (code.length !== 4) { joinError.textContent = "Room code should be 4 letters."; return; }
-  if (!name) { joinError.textContent = "Please enter your name."; return; }
+  if (!name) { joinError.textContent = "Please enter your team name."; return; }
 
   roomCode = code;
   playerName = name;
@@ -67,13 +73,12 @@ function join() {
     channel = ch;
     channel.publish("join", { playerId, playerName });
 
-    channel.listen("question", data => {
-      currentQuestionIndex = data.index;
-      hasAnsweredThisRound = false;
-      renderQuestion(data);
+    channel.listen("round_start", data => {
+      currentIndex = data.index;
+      startRound();
     });
 
-    channel.listen("result", data => renderResult(data));
+    channel.listen("round_result", data => renderRoundResult(data));
     channel.listen("game_over", data => renderFinal(data));
 
     waitingRoom.textContent = roomCode;
@@ -86,76 +91,106 @@ function join() {
   });
 }
 
-function renderQuestion(data) {
-  questionCounterP.textContent = `Q ${data.index + 1}/${data.total}`;
-  questionTextP.textContent = data.question;
-  statusP.textContent = "Tap the correct answer!";
+function startRound() {
+  const song = SONGS[currentIndex];
+  tokens = tokenizeLine(song.line);
+  pool = shuffleTokens(tokens);
+  builtCount = 0;
+  locked = false;
 
-  tileGridP.innerHTML = data.options.map((opt, i) => `
-    <button class="tile" data-slot="${i}" type="button">
-      <span class="letter">${TILE_LETTERS[i]}</span>
-      <span class="text">${escapeHtml(opt)}</span>
-    </button>
-  `).join("");
+  questionCounterP.textContent = `Song ${currentIndex + 1}/${SONGS.length}`;
+  statusP.textContent = "Go! Tap the first word.";
 
-  tileGridP.querySelectorAll(".tile").forEach(btn => {
-    btn.addEventListener("click", () => answer(Number(btn.dataset.slot)));
-  });
-
+  renderSentenceBuilder();
+  renderPool();
   showView(questionView);
 }
 
-function answer(slotIndex) {
-  if (hasAnsweredThisRound || !channel) return;
-  hasAnsweredThisRound = true;
+function renderSentenceBuilder() {
+  sentenceBuilder.innerHTML = tokens.map((t, i) => {
+    if (i < builtCount) return `<div class="slot filled">${escapeHtml(t.text)}</div>`;
+    return `<div class="slot">&nbsp;</div>`;
+  }).join("");
+}
 
-  tileGridP.querySelectorAll(".tile").forEach(btn => {
-    btn.disabled = true;
-    if (Number(btn.dataset.slot) !== slotIndex) btn.classList.add("is-locked");
-  });
-  statusP.textContent = "Waiting to see if you were first…";
-
-  channel.publish("buzz", {
-    playerId,
-    playerName,
-    answerIndex: slotIndex,
-    questionIndex: currentQuestionIndex,
+function renderPool() {
+  wordPool.innerHTML = pool.map(t => `<button class="word-tile" data-id="${t.id}" type="button">${escapeHtml(t.text)}</button>`).join("");
+  wordPool.querySelectorAll(".word-tile").forEach(btn => {
+    btn.addEventListener("click", () => tapTile(Number(btn.dataset.id)));
   });
 }
 
-function renderResult(data) {
-  if (data.questionIndex !== currentQuestionIndex) return;
+function tapTile(tileId) {
+  if (locked) return;
 
-  const scores = data.scores || {};
+  if (tileId === builtCount) {
+    builtCount++;
+    pool = pool.filter(t => t.id !== tileId);
+    renderSentenceBuilder();
+    renderPool();
+
+    channel && channel.publish("progress", { playerId, current: builtCount, total: tokens.length, questionIndex: currentIndex });
+
+    if (builtCount === tokens.length) {
+      locked = true;
+      lockPool();
+      statusP.textContent = "✅ You solved it! Waiting for the host…";
+      channel && channel.publish("solved", { playerId, playerName, questionIndex: currentIndex });
+    } else {
+      statusP.textContent = "Keep going!";
+    }
+  } else {
+    const btn = wordPool.querySelector(`[data-id="${tileId}"]`);
+    if (btn) btn.classList.add("is-wrong");
+    lockPool();
+    statusP.textContent = "❌ Not quite — resetting!";
+
+    setTimeout(() => {
+      if (locked) return; // round may have ended (someone else solved / time ran out) while we waited
+      builtCount = 0;
+      pool = shuffleTokens(tokens);
+      renderSentenceBuilder();
+      renderPool();
+      statusP.textContent = "Start over — go!";
+      channel && channel.publish("mistake", { playerId, questionIndex: currentIndex });
+      channel && channel.publish("progress", { playerId, current: 0, total: tokens.length, questionIndex: currentIndex });
+    }, WRONG_RESET_DELAY_MS);
+  }
+}
+
+function lockPool() {
+  wordPool.querySelectorAll(".word-tile").forEach(b => (b.disabled = true));
+}
+
+function renderRoundResult(data) {
+  if (data.questionIndex !== currentIndex) return;
+  locked = true;
+  lockPool();
+
+  const scores = data.teams || {};
   if (scores[playerId]) {
     myScore = scores[playerId].score;
     myScoreEl.textContent = myScore;
   }
 
-  tileGridP.querySelectorAll(".tile").forEach(btn => {
-    const slot = Number(btn.dataset.slot);
-    if (slot === data.correctIndex) btn.classList.add("is-correct");
-    else btn.classList.add("is-locked");
-  });
-
   if (data.winnerId === playerId) {
-    statusP.textContent = "✅ Correct! You scored the point.";
+    statusP.innerHTML = "🏆 Your team solved it first!";
   } else if (data.winnerId) {
-    statusP.textContent = `👏 ${data.winnerName} got it first.`;
+    statusP.innerHTML = `👏 ${escapeHtml(data.winnerName)} solved it first.`;
   } else {
-    statusP.textContent = "⏳ Time's up — nobody scored.";
+    statusP.innerHTML = "⏳ Time's up — nobody finished it.";
   }
 }
 
 function renderFinal(data) {
-  const scores = data.scores || {};
+  const scores = data.teams || {};
   const ids = Object.keys(scores);
   const sorted = ids.sort((a, b) => scores[b].score - scores[a].score);
 
   if (sorted.length >= 2 && scores[sorted[0]].score === scores[sorted[1]].score) {
     finalResultP.textContent = "🤝 It's a tie!";
   } else if (sorted[0] === playerId) {
-    finalResultP.textContent = "🏆 You won!";
+    finalResultP.textContent = "🏆 Your team won!";
   } else if (sorted.length) {
     finalResultP.textContent = `${scores[sorted[0]].name} won this round.`;
   } else {

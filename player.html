@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>Bible Buzzer — Player</title>
+  <title>Song Scramble — Team</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -19,15 +19,15 @@
 
     <!-- JOIN -->
     <section id="joinView" class="join-wrap">
-      <h1 class="display" style="text-align:center; font-size:1.8rem;">✝️ Join the Game</h1>
+      <h1 class="display" style="text-align:center; font-size:1.8rem;">🎶 Join as a Team</h1>
       <div class="panel">
         <div class="field">
           <label for="roomInput">Room code</label>
           <input id="roomInput" maxlength="4" placeholder="e.g. SAB7" autocapitalize="characters" />
         </div>
         <div class="field">
-          <label for="nameInput">Your name</label>
-          <input id="nameInput" maxlength="18" placeholder="e.g. Rica" />
+          <label for="nameInput">Team name</label>
+          <input id="nameInput" maxlength="20" placeholder="e.g. Team Judah" />
         </div>
         <button id="joinBtn" class="primary-btn">Join Game</button>
         <div id="joinError" class="muted" style="color:var(--bad); margin-top:10px;"></div>
@@ -38,18 +38,19 @@
     <section id="waitingView" class="hidden player-stage" style="text-align:center;">
       <div class="muted">Room <span id="waitingRoom" class="brass"></span></div>
       <h2 class="display">You're in, <span id="waitingName"></span>!</h2>
-      <p class="muted">Waiting for the host to start the game…</p>
+      <p class="muted">Huddle up — waiting for the host to start the game…</p>
     </section>
 
-    <!-- QUESTION -->
+    <!-- PLAYING -->
     <section id="questionView" class="hidden player-stage">
       <div class="player-topbar">
-        <span id="questionCounterP">Q 1/10</span>
+        <span id="questionCounterP">Song 1/5</span>
         <span>Score: <span id="myScore" class="brass">0</span></span>
       </div>
-      <div class="player-question" id="questionTextP">—</div>
-      <div class="tile-grid" id="tileGridP"></div>
-      <div class="player-status" id="statusP">Tap the correct answer!</div>
+      <p class="muted" style="text-align:center; margin:0;">Tap the words in the correct order to rebuild the line.</p>
+      <div class="sentence-builder" id="sentenceBuilder"></div>
+      <div class="word-pool" id="wordPool"></div>
+      <div class="player-status" id="statusP">Go!</div>
     </section>
 
     <!-- FINAL -->

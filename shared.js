@@ -10,21 +10,20 @@ const PIESOCKET_CONFIG = {
   clusterId: "free.blr2",
 };
 
-// Edit, remove, or add questions here. `correct` is the index (0-3) into `options`.
-const QUESTIONS = [
-  { q: "What day is the Sabbath day?", options: ["Friday", "Saturday", "Sunday", "Monday"], correct: 1 },
-  { q: "Who built the ark?", options: ["Moses", "Abraham", "Noah", "David"], correct: 2 },
-  { q: "How many days did God take to create the world?", options: ["5", "6", "7", "8"], correct: 1 },
-  { q: "What is the first book of the Bible?", options: ["Exodus", "Genesis", "Leviticus", "Numbers"], correct: 1 },
-  { q: "Who led the Israelites out of Egypt?", options: ["Joshua", "Aaron", "Moses", "Elijah"], correct: 2 },
-  { q: "Who betrayed Jesus?", options: ["Peter", "Judas Iscariot", "Thomas", "John"], correct: 1 },
-  { q: "What is the last book of the Bible?", options: ["Jude", "Acts", "Revelation", "Hebrews"], correct: 2 },
-  { q: "How many disciples did Jesus have?", options: ["10", "11", "12", "13"], correct: 2 },
-  { q: "Who was swallowed by a great fish?", options: ["Jonah", "Daniel", "Elijah", "Job"], correct: 0 },
-  { q: "Where was Jesus born?", options: ["Nazareth", "Jerusalem", "Bethlehem", "Jericho"], correct: 2 },
+
+// Each round: `line` is the scrambled sentence, `title` is revealed after the round.
+// All of these are public-domain hymn lines (1700s–1800s), safe to reuse freely.
+// Add, remove, or edit rounds here — the game just loops through however many you list.
+const SONGS = [
+  { line: "I sing the goodness of the Lord who filled the Earth with food", title: "I Sing the Mighty Power of God" },
+  { line: "Amazing grace how sweet the sound that saved a wretch like me", title: "Amazing Grace" },
+  { line: "Holy holy holy merciful and mighty", title: "Holy, Holy, Holy" },
+  { line: "When peace like a river attendeth my way", title: "It Is Well with My Soul" },
+  { line: "Blessed assurance Jesus is mine oh what a foretaste of glory divine", title: "Blessed Assurance" },
 ];
 
-const TILE_LETTERS = ["A", "B", "C", "D"];
+const ROUND_SECONDS = 45;
+const NEXT_ROUND_DELAY_MS = 5000;
 
 function generateRoomCode() {
   const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // no I/O, avoids confusion
@@ -34,14 +33,29 @@ function generateRoomCode() {
 }
 
 function generatePlayerId() {
-  return "p-" + Math.random().toString(36).slice(2, 10);
+  return "t-" + Math.random().toString(36).slice(2, 10);
 }
 
 function channelName(roomCode) {
-  return "bible-buzzer-" + roomCode.toUpperCase();
+  return "song-scramble-" + roomCode.toUpperCase();
 }
 
 function connectPieSocket(roomCode) {
   const piesocket = new PieSocket.default(PIESOCKET_CONFIG);
   return piesocket.subscribe(channelName(roomCode));
+}
+
+// Turns a line into tokens carrying their correct position, so duplicate
+// words (e.g. "holy holy holy") are still tracked as distinct tiles.
+function tokenizeLine(line) {
+  return line.split(" ").map((text, index) => ({ id: index, text }));
+}
+
+function shuffleTokens(tokens) {
+  const arr = tokens.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
