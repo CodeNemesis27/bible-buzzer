@@ -1,31 +1,43 @@
-# Bible Buzzer 🎮✝️
+# Song Scramble 🎶✝️
 
-A 2-player (or more) Bible trivia buzzer game. One device shows the question
-on a shared screen; players race to tap the correct answer first on their
-own phones.
+A hymn word-order game for two church groups. One shared screen keeps
+score across rounds; each team races on its own phone to tap a scrambled
+line of a hymn back into the correct order.
 
-- **No backend server required** — it's a plain static site (HTML/CSS/JS).
-- Real-time sync between devices is handled by **PieSocket** (a hosted
-  WebSocket service with a free tier), so it deploys to Vercel as-is.
+- **No backend server required** — a plain static site (HTML/CSS/JS).
+- Real-time sync between devices runs on **PieSocket** (same approach as
+  the Bible Buzzer game), so it deploys to Vercel as-is.
 
-## How it works
+## How it plays
 
-- `host.html` — put this on the shared screen / laptop / projector. It
-  shows a room code, generates the questions, runs the 15-second timer per
-  question, and decides who buzzed in first correctly.
-- `player.html` — each player opens this on their own phone, joins with the
-  room code + their name, and taps one of the 4 answer tiles.
-- Both pages talk to each other live over a WebSocket channel named after
-  the room code — no page needs to refresh or poll.
+1. Each team huddles around **one phone**. Someone taps for the group.
+2. The host screen shows a room code + QR. Teams join with the code and
+   a team name (e.g. "Team Judah").
+3. Once the host starts the round, each team's phone shows the same
+   scrambled line, broken into individual word tiles.
+4. Tap the words **in the correct order**. A correct tap turns that word
+   green and moves it into the sentence being built at the top.
+5. A wrong tap resets that team's board — all tapped words go back into
+   the scramble, and they start again from the first word. (Only that
+   team resets — the other team's progress is untouched.)
+6. First team to rebuild the full line correctly wins the round and a
+   point — there's no timer, so a round stays open until someone solves
+   it. (If a line stumps both teams, the host can tap **Skip to Next
+   Song** to move on without awarding a point.) The host screen reveals
+   the hymn title either way, so it stays educational regardless of the
+   outcome.
+7. After all rounds, the host screen shows the final score and winner.
 
 ## 1. Get a free PieSocket key (2 minutes)
 
+If you already set one up for Bible Buzzer, you can reuse the same key —
+this game just uses a different channel name so the two won't collide.
+Otherwise:
+
 1. Go to **[piesocket.com](https://www.piesocket.com/pricing)** and sign up
-   for the **free plan** (100 concurrent connections / 500k messages a day —
-   plenty for a 2-player game).
-2. In your PieSocket dashboard, create an API key and copy your **API Key**
-   and **Cluster ID**.
-3. Open `shared.js` and replace the placeholders near the top:
+   for the free plan.
+2. Create an API key, copy your **API Key** and **Cluster ID**.
+3. Open `shared.js` and paste them in:
 
    ```js
    const PIESOCKET_CONFIG = {
@@ -34,74 +46,72 @@ own phones.
    };
    ```
 
-That's the only setup step — there's no server, database, or `.env` file.
-
 ## 2. Try it locally (optional)
-
-Any static file server works, for example:
 
 ```bash
 npx serve .
 ```
 
-Then open `http://localhost:3000` on your laptop for the host, and on your
-phone (same Wi-Fi) for the player — or just open two browser tabs to test
-the flow yourself before deploying.
+Open the host page on your laptop and the team page on your phone (same
+Wi-Fi) — or just use two browser tabs to test the flow yourself.
 
 ## 3. Deploy to Vercel
 
-**Easiest way (no CLI):**
-1. Go to [vercel.com/new](https://vercel.com/new).
-2. Drag and drop this folder (or connect the GitHub repo it's pushed to).
-3. Framework preset: **Other** — no build command, no output directory
-   needed, since these are plain static files. Deploy.
+**Easiest way:** go to [vercel.com/new](https://vercel.com/new), drag and
+drop this folder (or connect the repo). Framework preset: **Other** — no
+build command or output directory needed, it's static files.
 
-**Or with the Vercel CLI:**
+**Or with the CLI:**
 ```bash
 npm i -g vercel
-cd bible-buzzer
+cd song-scramble
 vercel
 ```
 
-Once deployed you'll get a URL like `https://your-game.vercel.app`.
-
 ## 4. Play
 
-1. On the shared screen, open `https://your-game.vercel.app/host.html`.
-2. It shows a 4-letter **room code** and a QR code.
-3. Each player opens `https://your-game.vercel.app/player.html` on their
-   phone (or scans the QR code, which fills the room code in automatically),
-   types their name, and taps **Join Game**.
-4. Once players show up in the lobby list, the host taps **Start Game**.
-5. Each question flashes on the shared screen for 15 seconds with 4
-   answers. Players tap their matching tile on their phones — **first
-   correct tap wins the point**; a wrong tap doesn't end the round, so the
-   other player can still buzz in correctly.
-6. After 10 questions, the final scoreboard and winner are shown. Tap
-   **Play Again** on the host screen to reset scores and go again with the
-   same room code.
+1. Host opens `https://your-game.vercel.app/host.html` on the shared
+   screen — shows the room code + QR.
+2. Each team opens `https://your-game.vercel.app/player.html` (or scans
+   the QR, which fills the code in automatically), types a team name,
+   and taps **Join Game**.
+3. Host taps **Start Game** once both teams show up in the lobby.
+4. Each round stays open until a team finishes it. The host screen shows
+   both teams' sentences filling in live, word by word, plus an activity
+   feed ("Team B slipped up and had to restart!").
+5. After 5 rounds, tap **Play Again** on the host screen to reset scores
+   and go again with the same room code.
 
-## Customizing the questions
+## Customizing the songs
 
-Open `shared.js` and edit the `QUESTIONS` array — add, remove, or change
-any of the 10 entries. `correct` is the index (0 = A, 1 = B, 2 = C, 3 = D)
-of the right answer:
+Open `shared.js` and edit the `SONGS` array. `line` is what gets
+scrambled; `title` is revealed after each round:
 
 ```js
-{ q: "What day is the Sabbath day?", options: ["Friday", "Saturday", "Sunday", "Monday"], correct: 1 },
+{ line: "I sing the goodness of the Lord who filled the Earth with food", title: "I Sing the Mighty Power of God" },
 ```
 
-You can also change:
-- `QUESTION_SECONDS` in `host.js` — how long each question stays open.
-- `NEXT_DELAY_MS` in `host.js` — how long the correct answer is shown
-  before the next question loads.
+The 5 starter lines are all from hymns written well over a century ago
+(Isaac Watts, John Newton, Fanny Crosby, etc.), so they're safely in the
+public domain — feel free to add more from your own hymnal the same way.
+
+You can also change, in `shared.js`:
+- `NEXT_ROUND_DELAY_MS` — how long the reveal stays up before the next
+  round loads (default 5000ms).
 
 ## Known limitations (kept simple on purpose)
 
 - If the host screen is refreshed mid-game, the room code changes and
-  players will need to rejoin — best to keep the host tab open for the
-  whole game.
-- More than 2 players can join the same room code and play too; the rule
-  is always "first correct tap wins," regardless of how many players join.
-- There's no persistent database — scores reset if everyone closes their
-  tabs. This is meant for a live, in-person game night, not an async game.
+  teams will need to rejoin — keep the host tab open for the whole game.
+- Built for one phone per team. If a team opens the game on two phones
+  at once, each phone runs its own independent puzzle rather than
+  sharing progress — pick one phone per team to avoid confusion.
+- No persistent database — scores reset if everyone closes their tabs.
+
+## Customizing the look
+
+The color palette, fonts, and decorative bits (torn paper edges, washi
+tape, the little botanical accent) are all defined as CSS variables and
+a handful of reusable classes near the top of `style.css` — `--bg-kraft`,
+`--paper`, `--accent`, etc. Change the hex values there to retheme
+everything at once.

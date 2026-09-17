@@ -10,7 +10,6 @@ const PIESOCKET_CONFIG = {
   clusterId: "free.blr2",
 };
 
-
 // Each round: `line` is the scrambled sentence, `title` is revealed after the round.
 // All of these are public-domain hymn lines (1700s–1800s), safe to reuse freely.
 // Add, remove, or edit rounds here — the game just loops through however many you list.
@@ -22,7 +21,6 @@ const SONGS = [
   { line: "Blessed assurance Jesus is mine oh what a foretaste of glory divine", title: "Blessed Assurance" },
 ];
 
-const ROUND_SECONDS = 45;
 const NEXT_ROUND_DELAY_MS = 5000;
 
 function generateRoomCode() {

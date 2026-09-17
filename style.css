@@ -1,14 +1,15 @@
 :root {
-  --bg-stage: #14101c;
-  --panel: #1f1a2b;
-  --panel-2: #241e33;
-  --line: #362d49;
-  --text: #f5efe2;
-  --text-muted: #a99bc0;
-  --brass: #d9a441;
-  --good: #3fae6a;
-  --bad: #b3432f;
-  --radius: 18px;
+  --bg-kraft: #cdb992;
+  --paper: #f4ecdb;
+  --paper-2: #e8dcc0;
+  --ink: #3f3020;
+  --ink-muted: #8a7658;
+  --accent: #c1723f;
+  --accent-dark: #9c5a30;
+  --good: #7c8f52;
+  --bad: #a8462f;
+  --line: #d3c19a;
+  --radius: 14px;
 }
 
 * {
@@ -20,8 +21,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: var(--bg-stage);
-  color: var(--text);
+  color: var(--ink);
   font-family: "Manrope", sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
@@ -30,6 +30,12 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-kraft);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/></svg>"),
+    radial-gradient(circle at 12% 15%, rgba(255, 255, 255, 0.14), transparent 55%),
+    radial-gradient(circle at 88% 80%, rgba(0, 0, 0, 0.07), transparent 55%);
+  background-blend-mode: overlay, normal, normal;
 }
 
 h1,
@@ -41,12 +47,21 @@ h3,
   margin: 0;
 }
 
-.muted {
-  color: var(--text-muted);
+.handwritten {
+  font-family: "Caveat", cursive;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2.4rem, 8vw, 3.6rem);
+  line-height: 1;
 }
 
-.brass {
-  color: var(--brass);
+.muted {
+  color: var(--ink-muted);
+}
+
+.accent {
+  color: var(--accent-dark);
 }
 
 button {
@@ -57,70 +72,145 @@ button {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid var(--brass);
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ---------- Paper card / torn edge / washi tape / botanical accents ---------- */
+
+.paper-card {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 28px 32px;
+  box-shadow: 0 10px 24px rgba(63, 48, 32, 0.16);
+}
+
+.torn-edge {
+  position: relative;
+}
+
+.torn-edge::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -2px;
+  right: -2px;
+  height: 16px;
+  background: var(--bg-kraft);
+  clip-path: polygon(0% 100%, 3% 30%, 7% 100%, 11% 15%, 15% 100%, 19% 35%, 23% 100%,
+      27% 10%, 31% 100%, 35% 28%, 39% 100%, 43% 18%, 47% 100%, 51% 32%,
+      55% 100%, 59% 12%, 63% 100%, 67% 26%, 71% 100%, 75% 16%, 79% 100%,
+      83% 30%, 87% 100%, 91% 14%, 95% 100%, 100% 22%, 100% 100%);
+}
+
+.washi-tape {
+  position: absolute;
+  top: -14px;
+  left: 26px;
+  width: 72px;
+  height: 26px;
+  background: repeating-linear-gradient(135deg, rgba(193, 114, 63, 0.85) 0 8px, rgba(217, 145, 102, 0.7) 8px 16px);
+  opacity: 0.92;
+  transform: rotate(-6deg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+}
+
+.washi-tape--small {
+  width: 54px;
+  height: 20px;
+  left: 20px;
+  top: -10px;
+}
+
+.botanical-accent {
+  position: absolute;
+  pointer-events: none;
+}
+
+.botanical-accent--landing {
+  bottom: 6px;
+  left: 4px;
+}
+
+.final .paper-card .botanical-accent {
+  bottom: -14px;
+  left: -10px;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* ---------- Landing page ---------- */
 
 .landing {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 20px;
+  padding: 40px 20px;
   text-align: center;
-  gap: 10px;
-}
-
-.landing .display {
-  font-size: clamp(2.2rem, 7vw, 3.2rem);
+  gap: 12px;
 }
 
 .landing p {
-  color: var(--text-muted);
-  max-width: 40ch;
-  margin: 0 0 22px;
+  color: var(--ink-muted);
+  max-width: 42ch;
+  margin: 4px 0 26px;
+  font-size: 1.05rem;
 }
 
 .role-cards {
   display: flex;
-  gap: 18px;
+  gap: 22px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .role-card {
-  background: var(--panel);
+  background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 28px 30px;
-  width: 220px;
+  border-radius: 6px;
+  padding: 34px 30px 28px;
+  width: 230px;
   text-decoration: none;
-  color: var(--text);
-  transition: border-color 0.15s ease;
+  color: var(--ink);
+  box-shadow: 0 10px 22px rgba(63, 48, 32, 0.18);
+  transform: rotate(-1.2deg);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.role-card:nth-of-type(2) {
+  transform: rotate(1.2deg);
 }
 
 .role-card:hover,
 .role-card:focus-visible {
-  border-color: var(--brass);
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 0 14px 26px rgba(63, 48, 32, 0.22);
 }
 
 .role-card .icon {
-  font-size: 2.4rem;
+  font-size: 2.6rem;
   display: block;
   margin-bottom: 10px;
 }
 
 .role-card .label {
+  display: block;
   font-family: "Fraunces", serif;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 600;
 }
 
 .role-card .sub {
-  color: var(--text-muted);
+  display: block;
+  color: var(--ink-muted);
   font-size: 0.9rem;
   margin-top: 4px;
 }
@@ -128,10 +218,11 @@ a:focus-visible {
 /* ---------- Shared panels / forms ---------- */
 
 .panel {
-  background: var(--panel);
+  background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px;
+  border-radius: 6px;
+  padding: 26px 28px;
+  box-shadow: 0 10px 24px rgba(63, 48, 32, 0.14);
 }
 
 .field {
@@ -143,66 +234,52 @@ a:focus-visible {
 }
 
 .field label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
 }
 
 .field input {
-  background: var(--panel-2);
+  background: var(--paper-2);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 12px 14px;
-  color: var(--text);
+  color: var(--ink);
   font-size: 1rem;
 }
 
 .field input:focus-visible {
-  outline: 2px solid var(--brass);
+  outline: 2px solid var(--accent);
 }
 
 .primary-btn {
-  background: var(--brass);
-  color: #201306;
+  background: var(--accent);
+  color: #fff8ee;
   font-weight: 700;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 13px 20px;
   font-size: 1rem;
   width: 100%;
+  box-shadow: 0 4px 10px rgba(156, 90, 48, 0.35);
 }
 
 .primary-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .secondary-btn {
   background: transparent;
-  border: 1px solid var(--line);
-  color: var(--text);
-  border-radius: 12px;
-  padding: 10px 16px;
-  font-size: 0.9rem;
+  border: 1.5px solid var(--accent);
+  color: var(--accent-dark);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
-.hidden {
-  display: none !important;
-}
-
-/* ---------- Timer bar ---------- */
-
-.timer-track {
-  width: 100%;
-  height: 8px;
-  border-radius: 5px;
-  background: var(--panel-2);
-  overflow: hidden;
-}
-
-.timer-fill {
-  height: 100%;
-  background: var(--brass);
-  width: 100%;
-  transition: width 1s linear;
+.secondary-btn:hover {
+  background: rgba(193, 114, 63, 0.08);
 }
 
 /* ---------- Sentence builder (filled slots) ---------- */
@@ -219,13 +296,14 @@ a:focus-visible {
   min-width: 40px;
   height: 40px;
   padding: 0 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  border: 1px dashed var(--line);
-  color: var(--text-muted);
+  border: 1.5px dashed var(--line);
+  color: var(--ink-muted);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .slot.filled {
@@ -258,11 +336,11 @@ a:focus-visible {
 }
 
 .word-tile {
-  background: var(--panel-2);
+  background: var(--paper-2);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 12px 16px;
-  color: var(--text);
+  color: var(--ink);
   font-weight: 600;
   font-size: 1rem;
   transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
@@ -279,7 +357,7 @@ a:focus-visible {
 }
 
 .word-tile:disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: default;
 }
 
@@ -299,13 +377,14 @@ a:focus-visible {
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+  font-size: 1.1rem;
 }
 
 .score-pill {
-  background: var(--panel);
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 8px 18px;
+  padding: 9px 20px;
   display: flex;
   gap: 10px;
   align-items: center;
@@ -316,7 +395,7 @@ a:focus-visible {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--brass);
+  background: var(--accent);
 }
 
 .host-stage {
@@ -325,16 +404,16 @@ a:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 26px;
   text-align: center;
 }
 
 .team-boards {
   width: 100%;
-  max-width: 900px;
+  max-width: 980px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 20px;
 }
 
 @media (max-width: 640px) {
@@ -344,74 +423,68 @@ a:focus-visible {
 }
 
 .team-board {
-  background: var(--panel);
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 20px 22px;
   text-align: left;
+  box-shadow: 0 8px 18px rgba(63, 48, 32, 0.12);
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .team-board.flash-wrong {
   border-color: var(--bad);
-  background: rgba(179, 67, 47, 0.18);
+  background: rgba(168, 70, 47, 0.16);
 }
 
 .team-board .name {
   font-family: "Fraunces", serif;
-  font-size: 1.2rem;
-  margin-bottom: 10px;
+  font-size: 1.6rem;
+  margin-bottom: 12px;
 }
 
 .team-board .sentence-builder {
   justify-content: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  gap: 10px;
 }
 
 .team-board .slot {
-  min-width: 34px;
-  height: 34px;
-  font-size: 0.9rem;
-}
-
-.progress-track {
-  width: 100%;
-  height: 14px;
-  border-radius: 8px;
-  background: var(--panel-2);
-  overflow: hidden;
-  margin-top: 6px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--brass);
-  width: 0%;
-  transition: width 0.25s ease;
+  min-width: 56px;
+  height: 56px;
+  font-size: 1.3rem;
+  padding: 0 12px;
 }
 
 .progress-label {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 1.05rem;
+  color: var(--ink-muted);
   margin-top: 4px;
 }
 
-.host-timer-wrap {
-  width: 100%;
-  max-width: 500px;
+.host-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
 .activity-feed {
-  min-height: 24px;
-  color: var(--text-muted);
-  font-size: 0.9rem;
+  min-height: 26px;
+  color: var(--ink-muted);
+  font-size: 1.15rem;
 }
 
 .reveal-line {
   font-family: "Fraunces", serif;
-  font-size: clamp(1.2rem, 3vw, 1.8rem);
-  color: var(--brass);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  color: var(--accent-dark);
   max-width: 34ch;
+}
+
+#revealTitle {
+  font-size: 1.3rem;
 }
 
 /* Lobby */
@@ -422,15 +495,26 @@ a:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 22px;
   text-align: center;
+}
+
+.lobby-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  max-width: 560px;
+}
+
+.lobby .muted {
+  font-size: 1.05rem;
 }
 
 .room-code {
   font-family: "Fraunces", serif;
   font-size: clamp(3rem, 12vw, 6rem);
   letter-spacing: 0.12em;
-  color: var(--brass);
+  color: var(--accent-dark);
 }
 
 .join-info {
@@ -458,7 +542,7 @@ a:focus-visible {
 }
 
 .player-list li {
-  background: var(--panel);
+  background: var(--paper-2);
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 8px 16px;
@@ -477,9 +561,17 @@ a:focus-visible {
   text-align: center;
 }
 
+.final .paper-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
 .final .winner {
   font-size: clamp(2rem, 5vw, 3rem);
-  color: var(--brass);
+  color: var(--accent-dark);
+  font-family: "Fraunces", serif;
 }
 
 .final-scores {
@@ -490,9 +582,9 @@ a:focus-visible {
 }
 
 .final-score-card {
-  background: var(--panel);
+  background: var(--paper-2);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 10px;
   padding: 18px 28px;
   min-width: 140px;
 }
@@ -500,7 +592,7 @@ a:focus-visible {
 .final-score-card .n {
   font-size: 2rem;
   font-family: "Fraunces", serif;
-  color: var(--brass);
+  color: var(--accent-dark);
 }
 
 /* ---------- Player (team) page ---------- */
@@ -520,8 +612,8 @@ a:focus-visible {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.9rem;
+  color: var(--ink-muted);
 }
 
 .player-stage {
@@ -534,7 +626,7 @@ a:focus-visible {
 
 .player-status {
   text-align: center;
-  color: var(--text-muted);
+  color: var(--ink-muted);
   min-height: 22px;
 }
 

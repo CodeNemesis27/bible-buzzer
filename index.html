@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@500;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -16,17 +16,33 @@
 <body>
 
   <div class="landing">
-    <h1 class="display">🎶 Song Scramble</h1>
+    <svg class="botanical-accent botanical-accent--landing" aria-hidden="true" width="110" height="100"
+      viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <path d="M15 95 Q 36 66 28 36 Q 25 18 38 5" stroke="#8a7854" stroke-width="3" stroke-linecap="round" />
+      <ellipse cx="20" cy="56" rx="10" ry="4.2" fill="#7c8f52" transform="rotate(-32 20 56)" />
+      <ellipse cx="33" cy="76" rx="10" ry="4.2" fill="#8a9b5e" transform="rotate(24 33 76)" />
+      <ellipse cx="16" cy="81" rx="8" ry="3.4" fill="#7c8f52" transform="rotate(-8 16 81)" />
+      <circle cx="38" cy="8" r="5" fill="#e6d9b0" />
+      <circle cx="47" cy="5" r="5" fill="#ddd0a0" />
+      <circle cx="43" cy="14" r="5" fill="#e6d9b0" />
+      <circle cx="52" cy="12" r="4.4" fill="#d4c38c" />
+      <circle cx="33" cy="15" r="4.4" fill="#ddd0a0" />
+      <circle cx="46" cy="20" r="4" fill="#c9b573" />
+    </svg>
+
+    <h1 class="handwritten">🎶 Song Scramble</h1>
     <p>A hymn word-order game for two groups. One screen keeps score, each team races on their own phone to tap the
       words back into the right order.</p>
 
     <div class="role-cards">
-      <a class="role-card" href="host.html">
+      <a class="role-card torn-edge" href="host.html">
+        <span class="washi-tape washi-tape--small" aria-hidden="true"></span>
         <span class="icon">📺</span>
         <span class="label">I'm the Display</span>
         <span class="sub">Put this on the shared screen or laptop</span>
       </a>
-      <a class="role-card" href="player.html">
+      <a class="role-card torn-edge" href="player.html">
+        <span class="washi-tape washi-tape--small" aria-hidden="true"></span>
         <span class="icon">📱</span>
         <span class="label">I'm a Team</span>
         <span class="sub">One phone per group</span>

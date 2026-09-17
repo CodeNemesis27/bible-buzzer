@@ -10,7 +10,6 @@ let teams = {};             // playerId -> { name, score, progress, total }
 let currentIndex = -1;
 let currentTokens = [];     // tokenized words for the round in progress, so boards can mirror them
 let roundLocked = false;
-let timerInterval = null;
 let recentMistake = {};     // playerId -> timestamp of last mistake, drives the board flash
 
 // ---- DOM refs ----
@@ -31,8 +30,8 @@ const revealWrap = document.getElementById("revealWrap");
 const resultBanner = document.getElementById("resultBanner");
 const revealLine = document.getElementById("revealLine");
 const revealTitle = document.getElementById("revealTitle");
-const timerFill = document.getElementById("timerFill");
 const activityFeed = document.getElementById("activityFeed");
+const skipBtn = document.getElementById("skipBtn");
 
 const winnerText = document.getElementById("winnerText");
 const finalScores = document.getElementById("finalScores");
@@ -124,7 +123,6 @@ function startGame() {
 }
 
 function nextRound() {
-  clearInterval(timerInterval);
   currentIndex++;
   if (currentIndex >= SONGS.length) {
     endGame();
@@ -144,44 +142,27 @@ function nextRound() {
   if (channel) {
     channel.publish("round_start", { index: currentIndex, total: SONGS.length });
   }
-
-  startTimer(ROUND_SECONDS);
 }
 
-function startTimer(seconds) {
-  timerFill.style.transition = "none";
-  timerFill.style.width = "100%";
-  void timerFill.offsetWidth; // force reflow so the transition below restarts cleanly
-  timerFill.style.transition = `width ${seconds}s linear`;
-  timerFill.style.width = "0%";
-
-  let remaining = seconds;
-  timerInterval = setInterval(() => {
-    remaining--;
-    if (remaining <= 0) {
-      clearInterval(timerInterval);
-      if (!roundLocked) {
-        roundLocked = true;
-        const song = SONGS[currentIndex];
-        showReveal("⏳ Time's up! Nobody finished this one.", song);
-        channel && channel.publish("round_result", {
-          questionIndex: currentIndex,
-          winnerId: null,
-          winnerName: null,
-          line: song.line,
-          title: song.title,
-          teams,
-        });
-        setTimeout(nextRound, NEXT_ROUND_DELAY_MS);
-      }
-    }
-  }, 1000);
-}
+skipBtn.addEventListener("click", () => {
+  if (roundLocked) return;
+  roundLocked = true;
+  const song = SONGS[currentIndex];
+  showReveal("⏭️ Skipped — moving on.", song);
+  channel && channel.publish("round_result", {
+    questionIndex: currentIndex,
+    winnerId: null,
+    winnerName: null,
+    line: song.line,
+    title: song.title,
+    teams,
+  });
+  setTimeout(nextRound, NEXT_ROUND_DELAY_MS);
+});
 
 function handleSolved(data) {
   if (data.questionIndex !== currentIndex || roundLocked || !teams[data.playerId]) return;
   roundLocked = true;
-  clearInterval(timerInterval);
 
   teams[data.playerId].score++;
   teams[data.playerId].progress = teams[data.playerId].total;
