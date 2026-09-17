@@ -8,8 +8,10 @@ const JOIN_URL = location.origin + location.pathname.replace(/host\.html$/, "pla
 let channel = null;
 let teams = {};             // playerId -> { name, score, progress, total }
 let currentIndex = -1;
+let currentTokens = [];     // tokenized words for the round in progress, so boards can mirror them
 let roundLocked = false;
 let timerInterval = null;
+let recentMistake = {};     // playerId -> timestamp of last mistake, drives the board flash
 
 // ---- DOM refs ----
 const lobbyView = document.getElementById("lobbyView");
@@ -61,11 +63,16 @@ function renderTeamBoards() {
   const ids = Object.keys(teams);
   teamBoards.innerHTML = ids.map(id => {
     const t = teams[id];
-    const pct = t.total ? Math.round((t.progress / t.total) * 100) : 0;
+    const isFlashing = recentMistake[id] && (Date.now() - recentMistake[id] < 600);
+    const slotsHtml = currentTokens.map((tok, i) => {
+      return i < t.progress
+        ? `<div class="slot filled">${escapeHtml(tok.text)}</div>`
+        : `<div class="slot">&nbsp;</div>`;
+    }).join("");
     return `
-      <div class="team-board">
+      <div class="team-board${isFlashing ? " flash-wrong" : ""}" data-team="${id}">
         <div class="name">${escapeHtml(t.name)} <span class="muted" style="font-size:0.8rem;">· Score ${t.score}</span></div>
-        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="sentence-builder">${slotsHtml}</div>
         <div class="progress-label">${t.progress}/${t.total} words</div>
       </div>`;
   }).join("");
@@ -92,6 +99,9 @@ connectPieSocket(ROOM_CODE).then(ch => {
   channel.listen("mistake", data => {
     if (data.questionIndex !== currentIndex || !teams[data.playerId]) return;
     activityFeed.textContent = `❌ ${teams[data.playerId].name} slipped up and had to restart!`;
+    recentMistake[data.playerId] = Date.now();
+    renderTeamBoards();
+    setTimeout(renderTeamBoards, 650); // clears the flash once recentMistake ages out
   });
 
   channel.listen("solved", data => handleSolved(data));
@@ -125,8 +135,8 @@ function nextRound() {
   revealWrap.classList.add("hidden");
 
   const song = SONGS[currentIndex];
-  const total = tokenizeLine(song.line).length;
-  Object.values(teams).forEach(t => { t.progress = 0; t.total = total; });
+  currentTokens = tokenizeLine(song.line);
+  Object.values(teams).forEach(t => { t.progress = 0; t.total = currentTokens.length; });
   renderTeamBoards();
 
   questionCounter.textContent = `Song ${currentIndex + 1} / ${SONGS.length}`;

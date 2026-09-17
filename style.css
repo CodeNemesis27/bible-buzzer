@@ -349,12 +349,29 @@ a:focus-visible {
   border-radius: var(--radius);
   padding: 18px;
   text-align: left;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.team-board.flash-wrong {
+  border-color: var(--bad);
+  background: rgba(179, 67, 47, 0.18);
 }
 
 .team-board .name {
   font-family: "Fraunces", serif;
   font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.team-board .sentence-builder {
+  justify-content: flex-start;
   margin-bottom: 8px;
+}
+
+.team-board .slot {
+  min-width: 34px;
+  height: 34px;
+  font-size: 0.9rem;
 }
 
 .progress-track {
